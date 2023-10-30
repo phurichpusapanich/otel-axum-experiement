@@ -1,0 +1,48 @@
+[package]
+name = "otel-tokio-axum"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+debug = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "0.1.68"
+axum = { version =  "0.6", features = ["json", "macros"] }
+azure_core = "0.12.0"
+azure_data_cosmos = "0.12.0"
+bb8 = "0.8"
+bb8-postgres = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+config = "0.13.3"
+futures = "0.3"
+human_name = "2.0.2"
+hyper = "0.14.26"
+itertools = "0.10.5"
+log = "0.4"
+opentelemetry = { version= "0.19.0", features = ["rt-tokio", "trace"] }
+opentelemetry-otlp = { version= "0.12.0", features = ["tokio", "grpc-tonic"] }
+reqwest = { version = "0.11", features = ["json", "brotli"] }
+reqwest-middleware = "0.2.1"
+reqwest-retry = "0.2.2"
+reqwest-tracing = "0.4.1"
+rust_decimal = { version = "1.29", features = ["db-tokio-postgres", "serde-with-float", "maths"] }
+rust_decimal_macros = "1.29"
+serde = { version = "1", features = ["derive"] }
+serde_derive = "1.0.163"
+serde_json = "1.0"
+tower = { version = "0.4", features = ["util", "timeout"] }
+tower-http = { version = "0.4.0", features = [
+    "auth",
+    "compression-full",
+    "trace",
+    "cors",
+] }
+tokio = { version = "1", features = ["full"] }
+tokio-postgres = { version = "0.7", features = ["with-chrono-0_4", "with-serde_json-1"]}
+tracing = "0.1"
+tracing-opentelemetry = "0.19.0"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+env_logger = "0.10.0"
