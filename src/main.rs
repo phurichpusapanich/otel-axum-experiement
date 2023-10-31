@@ -12,6 +12,8 @@ use axum::{
 use hyper::server::conn::AddrIncoming;
 use log::info;
 use opentelemetry_otlp::WithExportConfig;
+use opentelemetry::sdk::Resource;
+use opentelemetry::KeyValue;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use tower::ServiceBuilder;
@@ -38,6 +40,8 @@ struct MainResponse {
     last_name: String,
 }
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use opentelemetry::sdk::trace;
+use opentelemetry::sdk::trace::{RandomIdGenerator, Sampler};
 
 #[derive(Deserialize, Debug)]
 struct Remarks {
@@ -57,6 +61,15 @@ async fn main() -> Result<()> {
             opentelemetry_otlp::new_exporter()
                 .tonic()
                 .with_endpoint(settings.otel.url),
+        )
+        .with_trace_config(
+            trace::config()
+                .with_sampler(Sampler::AlwaysOn)
+                .with_id_generator(RandomIdGenerator::default())
+                .with_max_events_per_span(64)
+                .with_max_attributes_per_span(16)
+                .with_max_events_per_span(16)
+                .with_resource(Resource::new(vec![KeyValue::new("service.name", "ote-axum-testing")]))
         )
         .install_batch(opentelemetry::runtime::Tokio)
         .expect("Couldn't create OTLP tracer");
