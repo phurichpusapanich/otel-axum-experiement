@@ -1,0 +1,44 @@
+version: '2.1'
+
+orbs:
+  gcp-gcr: circleci/gcp-gcr@0.15.1
+
+jobs:
+  format-and-lint:
+    docker:
+    # Primary container image where all steps run
+     - image: cimg/rust:1.69.0
+    steps:
+      - checkout
+      - run:
+          name: Install protoc
+          command: sudo apt-get update && sudo apt-get install protobuf-compiler
+      - run:
+          name: Format Check
+          command: cargo fmt --check
+      - run:
+          name: Lint
+          command: cargo clippy --locked -- -D warnings
+  build:
+    docker:
+      # Primary container image where all steps run
+      - image: cimg/rust:1.69.0
+    steps:
+      - checkout
+      - run:
+          name: Install protoc
+          command: sudo apt-get update && sudo apt-get install protobuf-compiler
+      - run:
+          name: Build
+          command: cargo build --release
+
+workflows:
+  version: 2
+  production:
+    jobs:
+      - format-and-lint
+      - docker-build-and-push:
+          context:
+            - cipher
+          requires:
+            - format-and-lint

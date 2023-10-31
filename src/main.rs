@@ -22,7 +22,6 @@ use tower_http::{
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-use tracing::{debug};
 
 
 trait PrintRandomStuffs {
