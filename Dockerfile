@@ -4,7 +4,7 @@ COPY . /app
 RUN apt-get update && apt-get install -y protobuf-compiler libc6
 RUN cargo build --release
 
-FROM debian:buster-slim
+FROM debian:bullseye-stable
 COPY --from=build-env /app/target/release/otel-tokio-axum  /
 COPY --from=build-env /app/config/ /
 CMD ["./otel-tokio-axum"]
