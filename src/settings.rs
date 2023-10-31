@@ -24,10 +24,7 @@ impl Settings {
             // Add in the current environment file
             // Default to 'development' env
             // Note that this file is _optional_
-            .add_source(
-                File::with_name(&format!("config/{}", run_mode))
-                    .required(false),
-            )
+            .add_source(File::with_name(&format!("config/{}", run_mode)).required(false))
             // You may also programmatically change settings
             .build()?;
 

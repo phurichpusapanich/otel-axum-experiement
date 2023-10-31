@@ -3,18 +3,17 @@ mod settings;
 use settings::Settings;
 
 use axum::{
+    extract::Query,
+    http::{header, Method},
     routing::get,
     routing::IntoMakeService,
-    Router,
-    extract::Query,
-    Json,
-    Server,
-    http::{header, Method},};
-use opentelemetry_otlp::WithExportConfig;
+    Json, Router, Server,
+};
 use hyper::server::conn::AddrIncoming;
+use log::info;
+use opentelemetry_otlp::WithExportConfig;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
-use log::{info};
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer,
@@ -22,7 +21,6 @@ use tower_http::{
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-
 
 trait PrintRandomStuffs {
     fn print_random_stuffs(&self);
@@ -41,7 +39,6 @@ struct MainResponse {
 }
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-
 #[derive(Deserialize, Debug)]
 struct Remarks {
     remarks: String,
@@ -49,7 +46,6 @@ struct Remarks {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-
     let settings = Settings::new().expect("Failed to load settings");
 
     println!("Initialising OTEL with {}", &settings.otel.url);
@@ -57,9 +53,11 @@ async fn main() -> Result<()> {
     // OpenTelemetry Trace
     let tracer = opentelemetry_otlp::new_pipeline()
         .tracing()
-        .with_exporter(opentelemetry_otlp::new_exporter()
-                           .tonic()
-                           .with_endpoint(settings.otel.url))
+        .with_exporter(
+            opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_endpoint(settings.otel.url),
+        )
         .install_batch(opentelemetry::runtime::Tokio)
         .expect("Couldn't create OTLP tracer");
 
@@ -71,7 +69,6 @@ async fn main() -> Result<()> {
         .with(telemetry_layer) // otel
         .init();
 
-
     // fire off
     let server_handle = start_server();
     let _ = tokio::join!(server_handle.await);
@@ -80,12 +77,11 @@ async fn main() -> Result<()> {
 }
 
 async fn get_name(pagination: Query<Remarks>) -> Json<MainResponse> {
-
     let remarks: Remarks = pagination.0;
 
     let name = MainResponse {
         first_name: "Test Person Firstname".to_string(),
-        last_name: "Test Person Lastname".to_string()
+        last_name: "Test Person Lastname".to_string(),
     };
 
     name.print_random_stuffs();
@@ -96,14 +92,12 @@ async fn get_name(pagination: Query<Remarks>) -> Json<MainResponse> {
 
 #[tracing::instrument]
 fn make_name(name: &MainResponse) -> Result<()> {
-
     let j = serde_json::to_string(&name)?;
 
     println!("{}", j);
     info!("Name has been created");
 
     Ok(())
-
 }
 
 async fn start_server() -> Server<AddrIncoming, IntoMakeService<Router>> {
@@ -120,8 +114,7 @@ async fn start_server() -> Server<AddrIncoming, IntoMakeService<Router>> {
         .layer(CompressionLayer::new())
         .layer(cors);
 
-    let app = Router::new()
-        .route("/", get(get_name)).layer(service);
+    let app = Router::new().route("/", get(get_name)).layer(service);
 
     let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
     info!("listening on {}", addr);
