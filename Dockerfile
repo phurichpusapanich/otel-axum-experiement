@@ -5,5 +5,5 @@ RUN apt-get update && apt-get install -y protobuf-compiler
 RUN cargo build --release
 
 FROM debian:buster-slim
-COPY target/release/otel-tokio-axum  /
+COPY --from=build-env /app/target/release/otel-tokio-axum  /
 CMD ["./otel-tokio-axum"]
