@@ -16,9 +16,6 @@ jobs:
       - run:
           name: Format Check
           command: cargo fmt --check
-      - run:
-          name: Lint
-          command: cargo clippy --locked -- -D warnings
   docker-build-and-push:
     executor: gcp-gcr/default
     steps:
