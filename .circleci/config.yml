@@ -19,18 +19,24 @@ jobs:
       - run:
           name: Lint
           command: cargo clippy --locked -- -D warnings
-  build:
-    docker:
-      # Primary container image where all steps run
-      - image: cimg/rust:1.69.0
+  docker-build-and-push:
+    executor: gcp-gcr/default
     steps:
       - checkout
+      - gcp-gcr/gcr-auth
+      - gcp-gcr/build-image:
+          image: tool/otel-axum-tester
+          no_output_timeout: 20m
+          registry-url: us.gcr.io
+          tag: << pipeline.git.revision >>
+      - gcp-gcr/push-image:
+          digest-path: /tmp/digest.txt
+          image: tool/otel-axum-tester
+          registry-url: us.gcr.io
+          tag: << pipeline.git.revision >>
       - run:
-          name: Install protoc
-          command: sudo apt-get update && sudo apt-get install protobuf-compiler
-      - run:
-          name: Build
-          command: cargo build --release
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
 
 workflows:
   version: 2
