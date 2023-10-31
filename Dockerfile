@@ -1,7 +1,7 @@
 FROM rust:1.70 as build-env
 WORKDIR /app
 COPY . /app
-RUN apt-get update && apt-get install -y protobuf-compiler
+RUN apt-get update && apt-get install -y protobuf-compiler libc6
 RUN cargo build --release
 
 FROM debian:buster-slim
